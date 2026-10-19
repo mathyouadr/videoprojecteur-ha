@@ -1,0 +1,21 @@
+[Unit]
+Description=Ouvre la page d'accueil quand le vidéoprojecteur s'allume
+After=network-online.target accueil-projecteur.service
+Wants=network-online.target
+
+[Service]
+ExecStart=/bin/sh /opt/accueil-projecteur/projecteur-watch.sh
+# Clé ADB déjà autorisée sur le projecteur (copie de celle du PC).
+LoadCredential=adbkey:/etc/projecteur-watch/adbkey
+Environment=HOME=/var/lib/projecteur-watch
+StateDirectory=projecteur-watch
+Restart=always
+RestartSec=5
+DynamicUser=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

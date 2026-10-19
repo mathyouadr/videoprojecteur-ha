@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accueil</title>
+<style>
+  :root {
+    --fond: #0f1115;
+    --carte: #181b22;
+    --texte: #f2f3f5;
+    --doux: #9aa1ad;
+    --accent: #f5b544;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(1200px 600px at 15% 0%, #1d2230 0%, var(--fond) 60%);
+    color: var(--texte);
+    font: 400 3.4vh/1.3 system-ui, "Segoe UI", Roboto, sans-serif;
+    padding: 4vh 4vw; height: 100vh;
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 3vh 3vw;
+    overflow: hidden;
+  }
+  header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: end; }
+  h1 { font-size: 2.6em; font-weight: 600; letter-spacing: -0.02em; }
+  #date { color: var(--doux); font-size: 1.2em; margin-top: .2em; }
+  #heure { font-size: 3.6em; font-weight: 300; font-variant-numeric: tabular-nums; line-height: 1; }
+  .colonne { display: flex; flex-direction: column; gap: 3vh; min-height: 0; }
+  .carte { background: var(--carte); border-radius: 20px; padding: 2.5vh 2vw; overflow: hidden; min-height: 0; }
+  .carte h2 { font-size: .8em; text-transform: uppercase; letter-spacing: .12em; color: var(--doux); font-weight: 600; margin-bottom: 1.5vh; }
+  .meteo-actuelle { display: flex; align-items: center; gap: 1vw; }
+  .meteo-actuelle .icone { font-size: 2.4em; }
+  .meteo-actuelle .temp { font-size: 2.2em; font-weight: 300; }
+  .meteo-actuelle .etat { color: var(--doux); }
+  .jours { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1vw; margin-top: 1.5vh; text-align: center; }
+  .jours .nom { color: var(--doux); font-size: .85em; }
+  .jours .icone { font-size: 1.4em; }
+  .jours .min { color: var(--doux); }
+  #taches { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1.2vh; overflow: hidden; }
+  #taches li { display: flex; gap: .7em; align-items: baseline; font-size: 1.15em; }
+  #taches li:not(.vide)::before { content: ""; flex: none; width: .7em; height: .7em; border: 2px solid var(--accent); border-radius: 50%; transform: translateY(.05em); }
+  #taches .retard { color: var(--accent); font-size: .75em; }
+  .vide { color: var(--doux); }
+  .musique { display: flex; gap: 1.5vw; align-items: center; }
+  .musique img { width: 13vh; height: 13vh; border-radius: 12px; object-fit: cover; background: #222; }
+  .musique .titre { font-size: 1.25em; font-weight: 600; }
+  .musique .artiste { color: var(--doux); }
+  .grandit { flex: 1; }
+</style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1 id="salut">Bonjour Mathyou</h1>
+      <div id="date"></div>
+    </div>
+    <div id="heure"></div>
+  </header>
+
+  <div class="colonne">
+    <section class="carte grandit">
+      <h2>Tâches du jour</h2>
+      <ul id="taches"><li class="vide">Chargement…</li></ul>
+    </section>
+  </div>
+
+  <div class="colonne">
+    <section class="carte">
+      <h2>Météo</h2>
+      <div id="meteo" class="vide">Chargement…</div>
+    </section>
+    <section class="carte grandit">
+      <h2>Musique</h2>
+      <div id="musique" class="vide">Chargement…</div>
+    </section>
+  </div>
+
+<script>
+const ICONES = {
+  "clear-night": "🌙", cloudy: "☁️", exceptional: "⚠️", fog: "🌫️", hail: "🌨️",
+  lightning: "🌩️", "lightning-rainy": "⛈️", partlycloudy: "⛅", pouring: "🌧️",
+  rainy: "🌦️", snowy: "❄️", "snowy-rainy": "🌨️", sunny: "☀️", windy: "💨", "windy-variant": "💨",
+};
+const ETATS = {
+  "clear-night": "Nuit claire", cloudy: "Nuageux", exceptional: "Exceptionnel", fog: "Brouillard",
+  hail: "Grêle", lightning: "Orages", "lightning-rainy": "Orages et pluie", partlycloudy: "Éclaircies",
+  pouring: "Averses", rainy: "Pluie", snowy: "Neige", "snowy-rainy": "Neige et pluie",
+  sunny: "Ensoleillé", windy: "Venteux", "windy-variant": "Venteux",
+};
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function horloge() {
+  const d = new Date();
+  $("heure").textContent = d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  const txt = d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+  $("date").textContent = txt.charAt(0).toUpperCase() + txt.slice(1);
+  const h = d.getHours();
+  $("salut").textContent = (h >= 5 && h < 18 ? "Bonjour" : "Bonsoir") + " Mathyou";
+}
+
+function meteo(m) {
+  if (m.erreur) return '<span class="vide">Météo indisponible</span>';
+  const jours = m.jours.map((j) => {
+    const nom = new Date(j.date + "T12:00").toLocaleDateString("fr-FR", { weekday: "short" });
+    return `<div><div class="nom">${esc(nom)}</div><div class="icone">${ICONES[j.etat] || "·"}</div>
+      <div>${Math.round(j.max)}° <span class="min">${j.min == null ? "" : Math.round(j.min) + "°"}</span></div></div>`;
+  }).join("");
+  return `<div class="meteo-actuelle"><span class="icone">${ICONES[m.etat] || ""}</span>
+    <div><div class="temp">${Math.round(m.temperature)}°</div><div class="etat">${esc(ETATS[m.etat] || m.etat)}</div></div></div>
+    <div class="jours">${jours}</div>`;
+}
+
+function taches(t) {
+  if (t.erreur) return '<li class="vide">Tâches indisponibles</li>';
+  if (!t.length) return '<li class="vide">Rien de prévu aujourd\'hui</li>';
+  const today = new Date().toISOString().slice(0, 10);
+  return t.slice(0, 8).map((x) =>
+    `<li>${esc(x.titre)}${x.echeance && x.echeance < today ? ' <span class="retard">en retard</span>' : ""}</li>`).join("");
+}
+
+function musique(m) {
+  if (m.erreur) return '<span class="vide">Musique indisponible</span>';
+  if (!m.titre || m.etat === "off" || m.etat === "idle") return '<span class="vide">Pas de musique en cours</span>';
+  const img = m.pochette ? `<img src="/cover?t=${Date.now()}" alt="">` : "";
+  return `<div class="musique">${img}<div><div class="titre">${esc(m.titre)}</div>
+    <div class="artiste">${esc(m.artiste)}${m.etat === "paused" ? " · en pause" : ""}</div></div></div>`;
+}
+
+async function donnees() {
+  try {
+    const d = await (await fetch("/api/data", { cache: "no-store" })).json();
+    $("meteo").innerHTML = meteo(d.meteo); $("meteo").className = "";
+    $("taches").innerHTML = taches(d.taches);
+    $("musique").innerHTML = musique(d.musique); $("musique").className = "";
+  } catch (e) {
+    $("meteo").textContent = "Serveur injoignable";
+  }
+}
+
+horloge(); setInterval(horloge, 1000);
+donnees(); setInterval(donnees, 60000);
+</script>
+</body>
+</html>
