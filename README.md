@@ -114,6 +114,8 @@ data:
 
 ### Carte télécommande
 
+<img src="docs/telecommande-ha.png" alt="Onglet Projecteur de Home Assistant sur iPhone" width="320">
+
 Un onglet dédié « Projecteur » du dashboard téléphone (`/tel-lumieres/projecteur`) regroupe :
 
 - les flèches, OK, Accueil, Retour et Menu ;
@@ -138,6 +140,8 @@ L'intégration « Android TV Remote » de Google ne fonctionne pas ici : le serv
 de télécommande Google n'est pas installé sur ce launcher.
 
 ## 4. Page d'accueil à l'allumage
+
+![Page d'accueil (tâches et musique d'exemple)](docs/page-accueil.png)
 
 Quand le projecteur s'allume, il affiche une page « Bonjour Mathyou » avec :
 
